@@ -19,7 +19,8 @@ func main() {
 			c.String(http.StatusOK, "hello %s, you're at %s\n", c.Param("name"), c.Path)
 		})
 	}
-	v2 := engine.Group("v2")
+	v2 := engine.Group("/v2")
+	v2.Use(gee.Logger())
 	{
 		v2.POST("/login", func(c *gee.Context) {
 			c.JSON(http.StatusOK, gee.H{
