@@ -1,14 +1,28 @@
 package main
 
 import (
+	"fmt"
 	"gee"
+	"html/template"
 	"net/http"
+	"time"
 )
+
+func FormatAsDate(t time.Time) string {
+	year, month, day := t.Date()
+	return fmt.Sprintf("%d-%02d-%02d", year, month, day)
+}
 
 func main() {
 	engine := gee.New()
+	engine.SetFuncMap(template.FuncMap{
+		"FormatAsDate": FormatAsDate,
+	})
+	engine.LoadHTMLGlob("templates/*")
+	engine.Static("/assets", "./static")
+
 	engine.GET("/", func(c *gee.Context) {
-		c.HTML(http.StatusOK, "<h1>Hello Gee</h1>")
+		c.HTML(http.StatusOK, "css.tmpl", nil)
 	})
 	v1 := engine.Group("/v1")
 	{
@@ -32,5 +46,9 @@ func main() {
 			c.JSON(http.StatusOK, gee.H{"filepath": c.Param("filepath")})
 		})
 	}
+	engine.GET("/panic", func(c *gee.Context) {
+		names := []string{"jinxw"}
+		c.String(http.StatusOK, names[200])
+	})
 	engine.RUN(":9999")
 }
